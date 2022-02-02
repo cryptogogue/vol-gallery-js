@@ -1,0 +1,24 @@
+{
+    "presets": [
+        "@babel/preset-env"
+    ],
+    "plugins": [
+        [ "@babel/plugin-proposal-decorators", { "legacy": true }],
+        [
+            "module-resolver",
+            {
+                "root": [
+                    "./src"
+                ],
+                "alias": {
+                    "config": "./volume/config",
+                    "fgc": "./src/packages/fgc-common-js-src/export-node",
+                    "fgc-core": "./src/packages/fgc-common-js-src/export-core",
+                    "cardmotron": "./src/packages/vol-cardmotron-js-src/export-worker",
+                    "vol": "./src/packages/vol-common-js-src/export",
+                    "jsencrypt": "node-jsencrypt"
+                }
+            }
+        ]
+    ]
+}

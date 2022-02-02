@@ -1,0 +1,33 @@
+#!/bin/bash
+
+version: '3.7'
+
+networks:
+    t2_proxy:
+        external:
+            name: t2_proxy
+    socket_proxy:
+        external:
+            name: socket_proxy
+    default:
+        driver: bridge
+
+services:
+
+    webservice:
+        container_name: $DOCKER_CONTAINER_NAME
+        image: $DOCKER_IMAGE_NAME
+        build: ./
+        restart: unless-stopped
+        networks:
+            - t2_proxy
+            - socket_proxy
+        volumes:
+            - ./volume:/app/volume
+        labels:
+            - "traefik.enable=true"
+            - "traefik.http.routers.$DOCKER_CONTAINER_NAME-rtr.entrypoints=https"
+            - "traefik.http.routers.$DOCKER_CONTAINER_NAME-rtr.rule=Host(`$DOMAIN_NAME`)"
+            - "traefik.http.routers.$DOCKER_CONTAINER_NAME-rtr.middlewares=chain-no-auth@file"
+            - "traefik.http.routers.$DOCKER_CONTAINER_NAME-rtr.service=$DOCKER_CONTAINER_NAME-svc"
+            - "traefik.http.services.$DOCKER_CONTAINER_NAME-svc.loadbalancer.server.port=$PORT"
