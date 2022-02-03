@@ -16,7 +16,7 @@ export class VOLGalleryREST {
     constructor ( volQueryDB, ) {
         
         this.consensusService   = new vol.ConsensusService ();
-        this.svgConverter       = convertSVG.createConverter ();
+        this.svgConverter       = convertSVG.createConverter ({ puppeteer: { args: [ '--no-sandbox' ]}});
         this.revocable          = new fgc.RevocableContext ();
         this.router             = express.Router ();
 
