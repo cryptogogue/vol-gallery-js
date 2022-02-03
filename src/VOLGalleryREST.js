@@ -20,16 +20,15 @@ export class VOLGalleryREST {
         this.revocable          = new fgc.RevocableContext ();
         this.router             = express.Router ();
 
-        this.router.get         ( '/assets/:assetID',               this.getAssetAsync.bind ( this ));
+        this.router.get         ( '/owner/:ownerID/assets/:assetID/asset.png',               this.getAssetAsync.bind ( this ));
 
         this.startServiceLoopAsync ();
     }
 
     //----------------------------------------------------------------//
-    async fetchAssetSVGAsync ( assetID, dpi ) {
+    async fetchAssetSVGAsync ( assetID, ownerID, dpi ) {
 
         if ( !this.schema ) return false;
-
         const result = await this.revocable.fetchJSON ( this.consensusService.getServiceURL ( `/assets/${ assetID }` ));
         const asset = result.asset;
 
@@ -45,6 +44,21 @@ export class VOLGalleryREST {
 
         const docWidthInInches      = ( metrics.width ) / metrics.dpi;
         const docHeightInInches     = ( metrics.height ) / metrics.dpi;
+        
+        if (ownerID == asset.owner) {
+            return (
+                `<svg
+                    width   = "${ docWidthInInches * dpi }"
+                    height  = "${ docHeightInInches * dpi }"
+                    viewBox = "0 0 ${ docWidthInInches * dpi } ${ docHeightInInches * dpi }"
+                    preserveAspectRatio = 'xMidYMid meet'
+                >
+                    <g transform = "scale ( ${ dpiScale } ${ dpiScale })">
+                        ${ svgBody }
+                    </g>
+                </svg>`
+            );
+        }
 
         return (
             `<svg
@@ -54,7 +68,19 @@ export class VOLGalleryREST {
                 preserveAspectRatio = 'xMidYMid meet'
             >
                 <g transform = "scale ( ${ dpiScale } ${ dpiScale })">
-                    ${ svgBody }
+                    
+                <g>
+                <svg id="diagtext" xmlns="http://www.w3.org/2000/svg" 
+                xmlns:xlink="http://www.w3.org/1999/xlink" 
+                width="100%" height="100%">
+                <style type="text/css">text { fill: gray; font-family: Avenir, Arial, Helvetica, sans-serif; }
+                </style>
+                <defs>
+                <pattern id="owner" patternUnits="userSpaceOnUse" width="400" height="200"><text y="30" font-size="40" id="name"> ${asset.owner}</text></pattern>
+                <pattern xlink:href="#owner"><text y="120" x="200" font-size="30" id="occupation">asset owner</text></pattern><pattern id="combo" xlink:href="#owner" patternTransform="rotate(-45)"><use xlink:href="#name" /><use xlink:href="#occupation" />
+                </pattern></defs><rect width="100%" height="100%" fill="url(#combo)" >
+                </rect></svg>
+                </g>
                 </g>
             </svg>`
         );
@@ -70,7 +96,7 @@ export class VOLGalleryREST {
             const scale     = query.scale ? parseFloat ( query.scale ) : 1.0;
             const dpi       = query.dpi ? parseInt ( query.dpi ) : 300;
 
-            const svg = await this.fetchAssetSVGAsync ( request.params.assetID, dpi );
+            const svg = await this.fetchAssetSVGAsync ( request.params.assetID,  request.params.ownerID, dpi );
 
             if ( svg ) {
 
