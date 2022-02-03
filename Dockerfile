@@ -18,7 +18,7 @@ RUN git clone -b OpenSSL_1_1_1b https://github.com/openssl/openssl.git \
     && make                 \
     && make install
 
-RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - \
+RUN curl -sL https://deb.nodesource.com/setup_14.x | bash - \
     && apt-get install -y nodejs
 
 COPY ./package.json /app
@@ -31,6 +31,8 @@ RUN npm install \
 # every time the app changes.
 
 COPY . /app
+
+EXPOSE 7777
 
 ENTRYPOINT [ "npm" ]
 CMD [ "run", "prod" ]
